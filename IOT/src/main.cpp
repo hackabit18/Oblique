@@ -17,6 +17,7 @@ WiFiClient client;
 #define AIO_USERNAME    "aakashk_kvjp58"
 #define AIO_KEY         "46f406136c5e4e5f874e283f95ed3dfc"
 Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_USERNAME, AIO_KEY);
+void MQTT_connect();
 
 //Subscribe Topics
 Adafruit_MQTT_Subscribe t1 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/f/t1");
@@ -56,7 +57,7 @@ ArduinoOTA.onStart([]() {
     Serial.println("\nEnd");
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+    Serial.printf("Progress: %u%%\n", (progress / (total / 100)));
   });
   ArduinoOTA.onError([](ota_error_t error) {
     Serial.printf("Error[%u]: ", error);
@@ -90,7 +91,7 @@ void loop() {
     timeClient.update();
     Serial.printf("NTP Time: ");
     Serial.println(timeClient.getFormattedTime());
-    delay(1000);
+    delay(2500);
     ArduinoOTA.handle();
 }
 
@@ -101,7 +102,7 @@ void MQTT_connect() {
   // Stop if already connected.
   if (mqtt.connected()) {
     static unsigned int x = 0;
-    ping.publish(x++);
+    if(!ping.publish(x++)) Serial.println("Ping failed");
     return;
   }
 
