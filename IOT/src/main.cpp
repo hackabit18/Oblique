@@ -24,8 +24,8 @@ Adafruit_MQTT_Subscribe t2 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/f/t2"
 Adafruit_MQTT_Subscribe t3 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/f/t3");
 Adafruit_MQTT_Subscribe t4 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/f/t4");
 //Publish Topics
-Adafruit_MQTT_Subscribe button = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/f/button");
-Adafruit_MQTT_Subscribe ping = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/f/ping");
+Adafruit_MQTT_Publish button = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/f/button");
+Adafruit_MQTT_Publish ping = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/f/ping");
 
 /************************** NTP *****************************************/
 WiFiUDP ntpUDP;
@@ -100,21 +100,22 @@ void MQTT_connect() {
 
   // Stop if already connected.
   if (mqtt.connected()) {
+    static unsigned int x = 0;
+    ping.publish(x++);
     return;
   }
 
   Serial.print("Connecting to MQTT... ");
 
   uint8_t retries = 4;
-  while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
+  while ((ret = mqtt.connect()) != 0) {
        Serial.println(mqtt.connectErrorString(ret));
        Serial.println("Retrying MQTT connection in 5 seconds...");
        mqtt.disconnect();
-       delay(5000);  // wait 5 seconds
+       delay(5000);
        retries--;
        if (retries == 0) {
          Serial.println("Can't Cpnnect after 4 retries, Restart!");
-         // basically die and wait for WDT to reset me
        }
   }
   Serial.println("MQTT Connected!");
