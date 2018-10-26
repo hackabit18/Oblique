@@ -207,18 +207,32 @@ public class SelectTime extends AppCompatActivity {
                 {
                     case 1:
                         Toast.makeText(SelectTime.this,ct1.getText().toString(),Toast.LENGTH_LONG).show();
+                        sendMessagetoAakash(removeLastTwo(ct1.getText().toString()));
+
 //                        i.putExtra("ChooseTime1",ct1.getText().toString());
                         break;
                     case 2:
+                        sendMessagetoAakash(removeLastTwo(ct1.getText().toString()));
+                        sendMessagetoAakash(removeLastTwo(ct2.getText().toString()));
+
 //                        i.putExtra("ChooseTime1",ct1.getText().toString());
 //                        i.putExtra("ChooseTime2",ct2.getText().toString());
                         break;
                     case 3:
+                        sendMessagetoAakash(removeLastTwo(ct1.getText().toString()));
+                        sendMessagetoAakash(removeLastTwo(ct2.getText().toString()));
+                        sendMessagetoAakash(removeLastTwo(ct3.getText().toString()));
+
 //                        i.putExtra("ChooseTime1",ct1.getText().toString());
 //                        i.putExtra("ChooseTime2",ct2.getText().toString());
 //                        i.putExtra("ChooseTime3",ct3.getText().toString());
                         break;
                     case 4:
+                        sendMessagetoAakash(removeLastTwo(ct1.getText().toString()));
+                        sendMessagetoAakash(removeLastTwo(ct2.getText().toString()));
+                        sendMessagetoAakash(removeLastTwo(ct3.getText().toString()));
+                        sendMessagetoAakash(removeLastTwo(ct4.getText().toString()));
+
 //                        i.putExtra("ChooseTime1",ct1.getText().toString());
 //                        i.putExtra("ChooseTime2",ct2.getText().toString());
 //                        i.putExtra("ChooseTime3",ct3.getText().toString());
@@ -262,7 +276,7 @@ public class SelectTime extends AppCompatActivity {
 
     }
 
-    private void SendMessagetoAakash(final String str){
+    private void sendMessagetoAakash(final String str){
 
         String clientId = MqttClient.generateClientId();
         final MqttAndroidClient client =
@@ -357,5 +371,10 @@ public class SelectTime extends AppCompatActivity {
         }
     }
 
+    private String removeLastTwo(String s){
+        String str = s.substring(0, s.length() - 2);
+        return str;
     }
+
+}
 
