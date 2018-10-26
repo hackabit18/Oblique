@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.NumberPicker;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
@@ -14,6 +15,7 @@ public class MainActivity extends AppCompatActivity {
     NumberPicker np;
     EditText Phone1;
     Button next;
+    TextView test;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
         np = findViewById(R.id.np);
         Phone1 = findViewById(R.id.Phone1);
         next = findViewById(R.id.next);
+        test = findViewById(R.id.testView);
 
         np.setMinValue(0);
         np.setMaxValue(1);
@@ -47,14 +50,18 @@ public class MainActivity extends AppCompatActivity {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(MainActivity.this,SelectTime.class);
-                startActivity(i);
+//                Intent i = new Intent(MainActivity.this,SelectTime.class);
+//                startActivity(i);
 
                 /**
                  * ADD NUMBER
                  * IN SHARED PREFERENCE
                  */
 
+                SharedPrefClass storeMobile = new SharedPrefClass(MainActivity.this);
+                storeMobile.saveMobile("mobile1 : ", Phone1.getText().toString());
+
+                test.setText(new SharedPrefClass(MainActivity.this).getMobile("mobile1 : "));
             }
         });
 

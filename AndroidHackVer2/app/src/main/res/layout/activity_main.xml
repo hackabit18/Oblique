@@ -8,6 +8,7 @@
     tools:context=".MainActivity">
 
     <TextView
+        android:id="@+id/testView"
         android:text="How many participants?"
         android:textSize="30sp"
         android:layout_width="wrap_content"
