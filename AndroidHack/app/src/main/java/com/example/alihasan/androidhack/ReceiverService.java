@@ -113,6 +113,8 @@ public class ReceiverService extends Service {
             @Override
             public void messageArrived(String topic, MqttMessage message) throws Exception {
 
+
+
                 Toast.makeText(getApplicationContext(), message.toString(), Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "received");
             }
