@@ -9,26 +9,35 @@
 /************************* WiFi Access Point *********************************/
 #define WLAN_SSID       "#Aakash"
 #define WLAN_PASS       "pez-1024"
-/************************* Adafruit.io Setup *********************************/
+WiFiClient client;
+
+/************************* MQTT Setup *********************************/
 #define AIO_SERVER      "io.adafruit.com"
 #define AIO_SERVERPORT  1883
 #define AIO_USERNAME    "aakashk_kvjp58"
 #define AIO_KEY         "46f406136c5e4e5f874e283f95ed3dfc"
+//Subscribe Topics
+Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_USERNAME, AIO_KEY);
+//Publish Topics
+Adafruit_MQTT_Subscribe onoffbutton = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/onoff");
+Adafruit_MQTT_Subscribe slider = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/slider");
+
 /************************** NTP *****************************************/
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 19800, 60000);
+NTPClient timeClient(ntpUDP, "0.asia.pool.ntp.org", 19800, 60000);
+
 
 void setup() {
-
 // Connect to Wifi & OTA
+Serial.begin(9600);
 Serial.println("Booting");
-WiFi.mode(WIFI_STA);
 WiFi.begin(WLAN_SSID, WLAN_PASS);
 while (WiFi.waitForConnectResult() != WL_CONNECTED) {
     Serial.println("Connection Failed! Rebooting...");
-    delay(5000);
+    delay(1000);
     ESP.restart();
     }
+
 ArduinoOTA.onStart([]() {
     String type;
     if (ArduinoOTA.getCommand() == U_FLASH) {
@@ -63,12 +72,13 @@ ArduinoOTA.onStart([]() {
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 // End of Wifi Connection Seq
-
 timeClient.begin();
-
 }
 
 void loop() {
+    timeClient.update();
+    Serial.printf("NTP Time: ");
+    Serial.println(timeClient.getFormattedTime());
     delay(1000);
     ArduinoOTA.handle();
 }
