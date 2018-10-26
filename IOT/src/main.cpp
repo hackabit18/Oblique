@@ -16,11 +16,16 @@ WiFiClient client;
 #define AIO_SERVERPORT  1883
 #define AIO_USERNAME    "aakashk_kvjp58"
 #define AIO_KEY         "46f406136c5e4e5f874e283f95ed3dfc"
-//Subscribe Topics
 Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_USERNAME, AIO_KEY);
+
+//Subscribe Topics
+Adafruit_MQTT_Subscribe t1 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/f/t1");
+Adafruit_MQTT_Subscribe t2 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/f/t2");
+Adafruit_MQTT_Subscribe t3 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/f/t3");
+Adafruit_MQTT_Subscribe t4 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/f/t4");
 //Publish Topics
-Adafruit_MQTT_Subscribe onoffbutton = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/onoff");
-Adafruit_MQTT_Subscribe slider = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/slider");
+Adafruit_MQTT_Subscribe button = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/f/button");
+Adafruit_MQTT_Subscribe ping = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/f/ping");
 
 /************************** NTP *****************************************/
 WiFiUDP ntpUDP;
@@ -73,12 +78,44 @@ ArduinoOTA.onStart([]() {
   Serial.println(WiFi.localIP());
 // End of Wifi Connection Seq
 timeClient.begin();
+//Sub Topics
+mqtt.subscribe(&t1);
+mqtt.subscribe(&t2);
+mqtt.subscribe(&t3);
+mqtt.subscribe(&t4);
 }
 
 void loop() {
+    MQTT_connect();
     timeClient.update();
     Serial.printf("NTP Time: ");
     Serial.println(timeClient.getFormattedTime());
     delay(1000);
     ArduinoOTA.handle();
+}
+
+/****************************** FUNCTIONS *************************************/
+void MQTT_connect() {
+  int8_t ret;
+
+  // Stop if already connected.
+  if (mqtt.connected()) {
+    return;
+  }
+
+  Serial.print("Connecting to MQTT... ");
+
+  uint8_t retries = 4;
+  while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
+       Serial.println(mqtt.connectErrorString(ret));
+       Serial.println("Retrying MQTT connection in 5 seconds...");
+       mqtt.disconnect();
+       delay(5000);  // wait 5 seconds
+       retries--;
+       if (retries == 0) {
+         Serial.println("Can't Cpnnect after 4 retries, Restart!");
+         // basically die and wait for WDT to reset me
+       }
+  }
+  Serial.println("MQTT Connected!");
 }
