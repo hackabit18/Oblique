@@ -5,6 +5,7 @@
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 #include <NTPClient.h>
+#include <ArduinoJson.h>
 
 /************************* WiFi Access Point *********************************/
 #define WLAN_SSID       "#Aakash"
@@ -19,6 +20,14 @@ WiFiClient client;
 Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_USERNAME, AIO_KEY);
 void MQTT_connect();
 
+struct config
+{
+  byte hour;
+  byte minute;
+  byte color[3];
+};
+config reminder[4];
+
 //Subscribe Topics
 Adafruit_MQTT_Subscribe t1 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/f/t1");
 Adafruit_MQTT_Subscribe t2 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/f/t2");
@@ -32,11 +41,15 @@ Adafruit_MQTT_Publish ping = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/f/ping"
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "0.asia.pool.ntp.org", 19800, 60000);
 
+/************************** JSON **************************************/
+StaticJsonBuffer<200> jsonBuffer;
+String data_json = "{t1:[\"dd\"],[\"mm\"],t1:[\"dd\"],[\"mm\"],t1:[\"dd\"],[\"mm\"],t1:[\"dd\"],[\"mm\"]}";
 
 void setup() {
 // Connect to Wifi & OTA
 Serial.begin(9600);
 Serial.println("Booting");
+pinMode(D4,INPUT);
 WiFi.begin(WLAN_SSID, WLAN_PASS);
 while (WiFi.waitForConnectResult() != WL_CONNECTED) {
     Serial.println("Connection Failed! Rebooting...");
@@ -77,22 +90,50 @@ ArduinoOTA.onStart([]() {
   ArduinoOTA.begin();
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
-// End of Wifi Connection Seq
-timeClient.begin();
-//Sub Topics
-mqtt.subscribe(&t1);
-mqtt.subscribe(&t2);
-mqtt.subscribe(&t3);
-mqtt.subscribe(&t4);
+  // End of Wifi Connection Seq
+  timeClient.begin();
+  //Sub Topics
+  mqtt.subscribe(&t1);
+  mqtt.subscribe(&t2);
+  mqtt.subscribe(&t3);
+  mqtt.subscribe(&t4);
 }
 
 void loop() {
     MQTT_connect();
+    Adafruit_MQTT_Subscribe *subscription;
+    data_json = (char*)t1.lastread;
+    JsonObject& data = jsonBuffer.parseObject(data_json);
+    // Test if parsing succeeds.
+    if (!data.success()) {
+      Serial.println("parseObject() failed");
+    }
+      //Store Hour and minute in reminder
+      for(int i=1 ; i<5 ; i++) 
+      {
+        String str = "t";
+        str += (char)i;
+        reminder[i].hour = data[str][0];
+        reminder[i].minute = data[str][1];
+        Serial.printf("reminder[%d]: %dhour %dmin ",i,reminder[i].hour,reminder[i].minute);
+        Serial.printf("%d:%d:%d color\n",reminder[0].color,reminder[1].color,reminder[2].color);
+      }
+      
+      /*/Store Colors in reminder
+      {
+        String str = "c";
+        str += (char)i;
+        reminder[i].hour = data[str][0];
+        reminder[i].minute = data["t%d"][1];
+        
+      }
+      */
     timeClient.update();
     Serial.printf("NTP Time: ");
     Serial.println(timeClient.getFormattedTime());
-    delay(2500);
     ArduinoOTA.handle();
+    delay(2500);
+    
 }
 
 /****************************** FUNCTIONS *************************************/
@@ -102,7 +143,6 @@ void MQTT_connect() {
   // Stop if already connected.
   if (mqtt.connected()) {
     static unsigned int x = 0;
-    if(!ping.publish(x++)) Serial.println("Ping failed");
     return;
   }
 
