@@ -20,7 +20,8 @@ WiFiClient client;
 bool if_parsed = false;
 Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_USERNAME, AIO_KEY);
 Adafruit_MQTT_Subscribe t1 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/t1",MQTT_QOS_1);
-Adafruit_MQTT_Publish button = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/t2");
+Adafruit_MQTT_Publish ping = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/ping");
+Adafruit_MQTT_Publish button = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/button");
 void MQTT_connect();
 
 
@@ -29,6 +30,7 @@ struct config
   byte hour;
   byte minute;
   int timeleft;
+  int endtime;
 };
 config reminder[4];
 
@@ -42,19 +44,34 @@ StaticJsonBuffer<1000> jsonBuffer;
 String data_json;// = "{t1:[\"dd\"],[\"mm\"],t1:[\"dd\"],[\"mm\"],t1:[\"dd\"],[\"mm\"],t1:[\"dd\"],[\"mm\"]}";
 
 /******************************* Others *****************************************/
-const byte interruptPin = 14;
+
 volatile byte interruptCounter = 0;
 int numberOfInterrupts = 0;
 void handleInterrupt();
+unsigned long prev;
+unsigned long now;
+unsigned long timer;
 bool parse_success = true;
 int reminders;
 int reps;
+bool button_pressed = false;
+const byte interruptPin = 14;
+const byte r = 0;
+const byte g = 5;
+const byte b = 4;
+const byte speaker = 13;
+int time_in_min();
+long time_in_sec();
+void trigger(int,int,int);
 
 void setup() {
 // Connect to Wifi & OTA
 Serial.begin(9600);
 Serial.println("Booting");
 pinMode(interruptPin, INPUT_PULLUP);
+pinMode(r,OUTPUT);
+pinMode(g,OUTPUT);
+pinMode(b,OUTPUT);
 attachInterrupt(digitalPinToInterrupt(interruptPin), handleInterrupt, FALLING);
 WiFi.begin(WLAN_SSID, WLAN_PASS);
 while (WiFi.waitForConnectResult() != WL_CONNECTED) {
@@ -109,7 +126,7 @@ void loop() {
     while ((subscription = mqtt.readSubscription(3000) )) {
     subscription = mqtt.readSubscription(3000);
     data_json = (char*)t1.lastread;
-    Serial.print("lastread: ");
+    Serial.print("\nlastread: ");
     Serial.println(data_json);
  
       JsonObject& data = jsonBuffer.parseObject(data_json);
@@ -124,35 +141,66 @@ void loop() {
           //For reminder 1
             Serial.println("\nReminder 1 :-");
             String str = "t1";
-            reminder[0].hour[j] = data[str][j];
-            reminder[0].minute[j] = data[str][j+1];
-            Serial.printf("reminder[0]: %dhour %dmin\n",reminder[0].hour[j],reminder[0].minute[j]);
+            reminder[0].hour = data[str][0];
+            reminder[0].minute = data[str][1];
+            Serial.printf("reminder[0]: %dhour %dmin\n",reminder[0].hour,reminder[0].minute);
+
+          //For reminder 2
+            Serial.println("\nReminder 2 :-");
+            str = "t2";
+            reminder[1].hour = data[str][0];
+            reminder[1].minute = data[str][1];
+            Serial.printf("reminder[1]: %dhour %dmin\n",reminder[1].hour,reminder[0].minute);
+
+          //For reminder 3
+            Serial.println("\nReminder 3 :-");
+            str = "t3";
+            reminder[2].hour = data[str][0];
+            reminder[2].minute = data[str][1];
+            Serial.printf("reminder[2]: %dhour %dmin\n",reminder[2].hour,reminder[0].minute);
+
+            for(int i=0;i<=3;i++)
+            {
+              reminder[i].endtime = reminder[i].timeleft*60 + 30;
+            }
+
+          // Alarm Function
 
           if_parsed = true;
         }
-        if(if_parsed)
-        {
-        }
+        
       }
-
-  
-    //}
+      if(if_parsed)
+        {
+          
+          reminder[0].timeleft = reminder[0].hour*60 + reminder[0].minute- time_in_min();
+          reminder[1].timeleft = reminder[1].hour*60 + reminder[1].minute -  time_in_min();
+          reminder[2].timeleft = reminder[2].hour*60 + reminder[2].minute - time_in_min();
+          if(reminder[0].timeleft<0) reminder[0].timeleft = reminder[0].timeleft*(-1) + 1440;
+          if(reminder[1].timeleft<0) reminder[1].timeleft = reminder[1].timeleft*(-1) + 1440;
+          if(reminder[2].timeleft<0) reminder[2].timeleft = reminder[2].timeleft*(-1) + 1440;
+          Serial.println("Timeleft");
+          Serial.printf("%dmin\n", reminder[0].timeleft);
+          Serial.printf("%dmin\n", reminder[1].timeleft);
+          Serial.printf("%dmin\n",reminder[2].timeleft);
+          trigger(reminder[0].timeleft,reminder[1].timeleft,reminder[2].timeleft);
+        }
 
 
   Serial.print(F("\nPinging..."));
   static int x;
   Serial.print(x);
   Serial.print("...");
-  if (! button.publish(x++)) {
+  if (! ping.publish(x++)) {
     Serial.println(F("Failed"));
   } else {
     Serial.println(F("OK!"));
   }
-    
       
     timeClient.update();
     Serial.printf("NTP Time: ");
-    Serial.println(timeClient.getFormattedTime());
+    Serial.print(timeClient.getFormattedTime());
+    Serial.printf("=%dminutes",time_in_min());
     ArduinoOTA.handle();
     delay(2500);
 }
@@ -186,4 +234,26 @@ void MQTT_connect() {
 
 void handleInterrupt() {
   Serial.println("Hello");
+}
+
+int time_in_min()
+{
+ return timeClient.getHours()*60 + timeClient.getMinutes();
+}
+
+long time_in_sec()
+{
+ return timeClient.getHours()*60*60 + timeClient.getMinutes()*60 + timeClient.getSeconds();
+}
+
+void trigger(int a, int b, int c)
+{
+  if(button_pressed) return;
+  if(long(a*60) >= time_in_sec()) digitalWrite(r,!1);
+  if(long(b*60) >= time_in_sec()) digitalWrite(g,!1);
+  if(long(c*60) >= time_in_sec()) digitalWrite(b,!1);
+
+  if( (long)reminder[0].endtime > time_in_sec()) digitalWrite(r,!0);
+  if( (long)reminder[1].endtime > time_in_sec()) digitalWrite(g,!0);
+  if( (long)reminder[2].endtime > time_in_sec()) digitalWrite(b,!0);
 }
