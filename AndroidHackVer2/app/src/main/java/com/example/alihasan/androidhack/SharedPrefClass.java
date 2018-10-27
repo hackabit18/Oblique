@@ -48,7 +48,7 @@ public class SharedPrefClass {
     public String getTimings(String code){
 
         SharedPreferences sharedPref = context.getSharedPreferences("medical", Context.MODE_PRIVATE);
-        String timingValue = sharedPref.getString(code, "");
+        String timingValue = sharedPref.getString(code, "-1");
 
         return  timingValue;
     }
