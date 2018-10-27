@@ -195,54 +195,75 @@ public class SelectTime extends AppCompatActivity {
                 options.setPassword("46f406136c5e4e5f874e283f95ed3dfc".toCharArray());
 
                 int n = np.getValue();
+                new SharedPrefClass(SelectTime.this).saveNumber("timeNumber", n);
 
-//                TESTING INTENT
 //
-//                Intent i = new Intent(SelectTime.this,DateActivity.class);
-//                i.putExtra("Value",n);
-//                startActivity(i);
+//
+//
+////                TESTING INTENT
+////
+////                Intent i = new Intent(SelectTime.this,DateActivity.class);
+////                i.putExtra("Value",n);
+////                startActivity(i);
+//
+//
+//                switch(n)
+//                {
+//                    case 1:
+//                        Toast.makeText(SelectTime.this,ct1.getText().toString(),Toast.LENGTH_LONG).show();
+//                        sendMessagetoAakash(ct1.getText().toString());
+//
+////                        i.putExtra("ChooseTime1",ct1.getText().toString());
+//                        break;
+//                    case 2:
+//                        sendMessagetoAakash(removeLastTwo(ct1.getText().toString()));
+//                        sendMessagetoAakash(removeLastTwo(ct2.getText().toString()));
+//
+////                        i.putExtra("ChooseTime1",ct1.getText().toString());
+////                        i.putExtra("ChooseTime2",ct2.getText().toString());
+//                        break;
+//                    case 3:
+//                        sendMessagetoAakash(ct1.getText().toString());
+//                        sendMessagetoAakash(ct2.getText().toString());
+//                        sendMessagetoAakash(ct3.getText().toString());
+//
+////                        i.putExtra("ChooseTime1",ct1.getText().toString());
+////                        i.putExtra("ChooseTime2",ct2.getText().toString());
+////                        i.putExtra("ChooseTime3",ct3.getText().toString());
+//                        break;
+//                    case 4:
+//                        sendMessagetoAakash(ct1.getText().toString());
+//                        sendMessagetoAakash(ct2.getText().toString());
+//                        sendMessagetoAakash(ct3.getText().toString());
+//                        sendMessagetoAakash(ct4.getText().toString());
+//
+////                        i.putExtra("ChooseTime1",ct1.getText().toString());
+////                        i.putExtra("ChooseTime2",ct2.getText().toString());
+////                        i.putExtra("ChooseTime3",ct3.getText().toString());
+////                        i.putExtra("ChooseTime4",ct4.getText().toString());
+//                        break;
+//                    default:
+//                        Toast.makeText(SelectTime.this,"0 selected",Toast.LENGTH_LONG).show();
+//                }
 
+                new SharedPrefClass(SelectTime.this).saveTimings("timings1", ct1.getText().toString());
+                new SharedPrefClass(SelectTime.this).saveTimings("timings2", ct2.getText().toString());
+                new SharedPrefClass(SelectTime.this).saveTimings("timings3", ct3.getText().toString());
+                new SharedPrefClass(SelectTime.this).saveTimings("timings4", ct4.getText().toString());
 
-                switch(n)
-                {
-                    case 1:
-                        Toast.makeText(SelectTime.this,ct1.getText().toString(),Toast.LENGTH_LONG).show();
-                        sendMessagetoAakash(removeLastTwo(ct1.getText().toString()));
+                /**
+                 * Change GEAR VALUE
+                 */
 
-//                        i.putExtra("ChooseTime1",ct1.getText().toString());
-                        break;
-                    case 2:
-                        sendMessagetoAakash(removeLastTwo(ct1.getText().toString()));
-                        sendMessagetoAakash(removeLastTwo(ct2.getText().toString()));
+                new SharedPrefClass(SelectTime.this).saveGearActivityState("gear", 1);
 
-//                        i.putExtra("ChooseTime1",ct1.getText().toString());
-//                        i.putExtra("ChooseTime2",ct2.getText().toString());
-                        break;
-                    case 3:
-                        sendMessagetoAakash(removeLastTwo(ct1.getText().toString()));
-                        sendMessagetoAakash(removeLastTwo(ct2.getText().toString()));
-                        sendMessagetoAakash(removeLastTwo(ct3.getText().toString()));
+                //START GEAR INTENT
+                Intent g = new Intent(SelectTime.this,GearActivity.class);
+                startActivity(g);
 
-//                        i.putExtra("ChooseTime1",ct1.getText().toString());
-//                        i.putExtra("ChooseTime2",ct2.getText().toString());
-//                        i.putExtra("ChooseTime3",ct3.getText().toString());
-                        break;
-                    case 4:
-                        sendMessagetoAakash(removeLastTwo(ct1.getText().toString()));
-                        sendMessagetoAakash(removeLastTwo(ct2.getText().toString()));
-                        sendMessagetoAakash(removeLastTwo(ct3.getText().toString()));
-                        sendMessagetoAakash(removeLastTwo(ct4.getText().toString()));
-
-//                        i.putExtra("ChooseTime1",ct1.getText().toString());
-//                        i.putExtra("ChooseTime2",ct2.getText().toString());
-//                        i.putExtra("ChooseTime3",ct3.getText().toString());
-//                        i.putExtra("ChooseTime4",ct4.getText().toString());
-                        break;
-                    default:
-                        Toast.makeText(SelectTime.this,"0 selected",Toast.LENGTH_LONG).show();
-                }
-
-
+                /**
+                 * Sending JSON to MQTT
+                 */
 
             }
         });
@@ -268,7 +289,9 @@ public class SelectTime extends AppCompatActivity {
                 } else {
                     amPm = "AM";
                 }
-                chooseTime.setText(String.format("%02d:%02d", hourOfDay, minutes) + amPm);
+
+                //REMOVED AM/PM
+                chooseTime.setText(String.format("%02d:%02d", hourOfDay, minutes));
             }
         }, currentHour, currentMinute, false);
 
