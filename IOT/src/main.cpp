@@ -26,8 +26,9 @@ void MQTT_connect();
 
 struct config
 {
-  byte hour[4];
-  byte minute[4];
+  byte hour;
+  byte minute;
+  int timeleft;
 };
 config reminder[4];
 
@@ -46,6 +47,8 @@ volatile byte interruptCounter = 0;
 int numberOfInterrupts = 0;
 void handleInterrupt();
 bool parse_success = true;
+int reminders;
+int reps;
 
 void setup() {
 // Connect to Wifi & OTA
@@ -121,50 +124,22 @@ void loop() {
           //For reminder 1
             Serial.println("\nReminder 1 :-");
             String str = "t1";
-            for(int j=0; j<5; j+=2)
-            {
-              reminder[0].hour[j] = data[str][j];
-              reminder[0].minute[j] = data[str][j+1];
-              Serial.printf("reminder[0]: %dhour %dmin\n",reminder[0].hour[j],reminder[0].minute[j]);
-            }
+            reminder[0].hour[j] = data[str][j];
+            reminder[0].minute[j] = data[str][j+1];
+            Serial.printf("reminder[0]: %dhour %dmin\n",reminder[0].hour[j],reminder[0].minute[j]);
 
-          //For reminder 2
-          Serial.println("\nReminder 2 :-");
-            str = "t2";
-            for(int j=0; j<5; j+=2)
-            {
-              reminder[1].hour[j] = data[str][j];
-              reminder[1].minute[j] = data[str][j+1];
-              Serial.printf("reminder[1]: %dhour %dmin\n",reminder[0].hour[j],reminder[0].minute[j]);
-            }
-
-          //For reminder 3
-            Serial.println("\nReminder 3:-");
-            str = "t3";
-            for(int j=0; j<5; j+=2)
-            {
-              reminder[2].hour[j] = data[str][j];
-              reminder[2].minute[j] = data[str][j+1];
-              Serial.printf("reminder[2]: %dhour %dmin\n",reminder[0].hour[j],reminder[0].minute[j]);
-            }
-        
-          /*/Store Colors in reminder
-          {
-            String str = "c";
-            str += (char)i;
-            reminder[i].hour = data[str][0];
-            reminder[i].minute = data["t%d"][1];
-            
-          }*/
           if_parsed = true;
         }
-    }
+        if(if_parsed)
+        {
+        }
+      }
 
   
     //}
 
 
-  Serial.print(F("\nSending photocell val "));
+  Serial.print(F("\nPinging..."));
   static int x;
   Serial.print(x);
   Serial.print("...");
