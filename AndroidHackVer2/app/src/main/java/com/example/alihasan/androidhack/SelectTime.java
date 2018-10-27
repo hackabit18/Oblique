@@ -25,6 +25,8 @@ import java.util.Calendar;
 
 public class SelectTime extends AppCompatActivity {
 
+    String helper;
+
     EditText ct1;
     EditText ct2;
     EditText ct3;
@@ -83,6 +85,7 @@ public class SelectTime extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 setTime(ct1);
+
             }
         });
 
@@ -254,9 +257,9 @@ public class SelectTime extends AppCompatActivity {
                 String jsonMqtt = "{\n" +
                         "  \"value\":\n" +
                         "\t\t{\n" +
-                        "\t\t\t\"t1\":["+commaString(new SharedPrefClass(SelectTime.this).getTimings("timings1 : "))+"],  \n" +
-                        "\t\t\t\"t2\":["+commaString(new SharedPrefClass(SelectTime.this).getTimings("timings2 : "))+"],\n" +
-                        "\t\t\t\"t3\":["+commaString(new SharedPrefClass(SelectTime.this).getTimings("timings3 : "))+"]\n" +
+                        "\t\t\t\"t1\":["+(new SharedPrefClass(SelectTime.this).getTimings("timings1 : "))+"],  \n" +
+                        "\t\t\t\"t2\":["+(new SharedPrefClass(SelectTime.this).getTimings("timings2 : "))+"],\n" +
+                        "\t\t\t\"t3\":["+(new SharedPrefClass(SelectTime.this).getTimings("timings3 : "))+"]\n" +
                         "\t\t}\n" +
                         "}\n";
 
@@ -286,7 +289,8 @@ public class SelectTime extends AppCompatActivity {
                 } else {
                     amPm = "AM";
                 }
-                chooseTime.setText(String.format("%02d:%02d", hourOfDay, minutes));
+                chooseTime.setText(String.format("%d,%d", hourOfDay, minutes));
+
             }
         }, currentHour, currentMinute, false);
 
@@ -294,18 +298,6 @@ public class SelectTime extends AppCompatActivity {
 
     }
 
-    public String commaString(String str){
-
-        StringBuilder cStr = new StringBuilder(str);
-//        cStr.setCharAt(2,',');
-
-        if(str.equals("")) {
-            return "-1";
-        }
-        else
-            cStr.setCharAt(2,',');
-        return cStr.toString();
-    }
 
     private void sendMessagetoAakash(final String str){
 
