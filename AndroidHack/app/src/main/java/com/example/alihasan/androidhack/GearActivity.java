@@ -99,6 +99,36 @@ public class GearActivity extends AppCompatActivity {
                 startActivity(i);
             }
         });
+
+        /**
+         * RESET BUTTON
+         */
+        reset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                //GEAR RESET
+                new SharedPrefClass(GearActivity.this).saveGearActivityState("gear", 0);
+
+                //TIMMINGS CLEARED
+                new SharedPrefClass(GearActivity.this).saveTimings("timings1", "");
+                new SharedPrefClass(GearActivity.this).saveTimings("timings2", "");
+                new SharedPrefClass(GearActivity.this).saveTimings("timings3", "");
+
+                //PARTICIPANTS CLEARED
+                SharedPrefClass storeMobile1 = new SharedPrefClass(GearActivity.this);
+                storeMobile1.saveMobile("mobile1", "");
+
+                SharedPrefClass storeMobile2 = new SharedPrefClass(GearActivity.this);
+                storeMobile2.saveMobile("mobile2", "");
+
+                SharedPrefClass storeMobile3 = new SharedPrefClass(GearActivity.this);
+                storeMobile3.saveMobile("mobile3", "");
+
+                Intent i = new Intent(GearActivity.this,MainActivity.class);
+                startActivity(i);
+            }
+        });
     }
 
 
