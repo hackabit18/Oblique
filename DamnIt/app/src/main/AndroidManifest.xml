@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.alihasan.androidhack">
-
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.SEND_SMS" />
-
+    package="com.divyanshu.damnit">
 
     <application
         android:allowBackup="true"
@@ -27,11 +20,6 @@
         <service android:name="org.eclipse.paho.android.service.MqttService">
         </service>
 
-        <!--Receiver Service-->
-        <service android:name=".ReceiverService"
-            android:enabled="true"/>
-
-        <activity android:name=".SelectTime"></activity>
     </application>
 
 </manifest>

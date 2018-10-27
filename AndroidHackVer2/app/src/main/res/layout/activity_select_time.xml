@@ -60,5 +60,10 @@
         android:layout_centerVertical="true"
         android:hint="Choose the time"
         android:visibility="gone"/>
+    
+    <EditText
+        android:id="@+id/edit_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

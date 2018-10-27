@@ -194,7 +194,7 @@ public class SelectTime extends AppCompatActivity {
                 options.setUserName("aakashk_kvjp58");
                 options.setPassword("46f406136c5e4e5f874e283f95ed3dfc".toCharArray());
 
-                int n = np.getValue();
+//                int n = np.getValue();
 
 //                TESTING INTENT
 //
@@ -203,45 +203,53 @@ public class SelectTime extends AppCompatActivity {
 //                startActivity(i);
 
 
-                switch(n)
-                {
-                    case 1:
-                        Toast.makeText(SelectTime.this,ct1.getText().toString(),Toast.LENGTH_LONG).show();
-                        sendMessagetoAakash(removeLastTwo(ct1.getText().toString()));
+//                switch(n)
+//                {
+//                    case 1:
+//                        Toast.makeText(SelectTime.this,ct1.getText().toString(),Toast.LENGTH_LONG).show();
+//                        sendMessagetoAakash(removeLastTwo(ct1.getText().toString()));
+//
+////                        i.putExtra("ChooseTime1",ct1.getText().toString());
+//                        break;
+//                    case 2:
+//                        sendMessagetoAakash(removeLastTwo(ct1.getText().toString()));
+//                        sendMessagetoAakash(removeLastTwo(ct2.getText().toString()));
+//
+////                        i.putExtra("ChooseTime1",ct1.getText().toString());
+////                        i.putExtra("ChooseTime2",ct2.getText().toString());
+//                        break;
+//                    case 3:
+//                        sendMessagetoAakash(removeLastTwo(ct1.getText().toString()));
+//                        sendMessagetoAakash(removeLastTwo(ct2.getText().toString()));
+//                        sendMessagetoAakash(removeLastTwo(ct3.getText().toString()));
+//
+////                        i.putExtra("ChooseTime1",ct1.getText().toString());
+////                        i.putExtra("ChooseTime2",ct2.getText().toString());
+////                        i.putExtra("ChooseTime3",ct3.getText().toString());
+//                        break;
+//                    case 4:
+//                        sendMessagetoAakash(removeLastTwo(ct1.getText().toString()));
+//                        sendMessagetoAakash(removeLastTwo(ct2.getText().toString()));
+//                        sendMessagetoAakash(removeLastTwo(ct3.getText().toString()));
+//                        sendMessagetoAakash(removeLastTwo(ct4.getText().toString()));
+//
+////                        i.putExtra("ChooseTime1",ct1.getText().toString());
+////                        i.putExtra("ChooseTime2",ct2.getText().toString());
+////                        i.putExtra("ChooseTime3",ct3.getText().toString());
+////                        i.putExtra("ChooseTime4",ct4.getText().toString());
+//                        break;
+//                    default:
+//                        Toast.makeText(SelectTime.this,"0 selected",Toast.LENGTH_LONG).show();
+//                }
 
-//                        i.putExtra("ChooseTime1",ct1.getText().toString());
-                        break;
-                    case 2:
-                        sendMessagetoAakash(removeLastTwo(ct1.getText().toString()));
-                        sendMessagetoAakash(removeLastTwo(ct2.getText().toString()));
+                new SharedPrefClass(SelectTime.this).saveTimings("timings1 : ", ct1.getText().toString());
+                new SharedPrefClass(SelectTime.this).saveTimings("timings2 : ", ct2.getText().toString());
+                new SharedPrefClass(SelectTime.this).saveTimings("timings3 : ", ct3.getText().toString());
+                new SharedPrefClass(SelectTime.this).saveTimings("timings4 : ", ct4.getText().toString());
 
-//                        i.putExtra("ChooseTime1",ct1.getText().toString());
-//                        i.putExtra("ChooseTime2",ct2.getText().toString());
-                        break;
-                    case 3:
-                        sendMessagetoAakash(removeLastTwo(ct1.getText().toString()));
-                        sendMessagetoAakash(removeLastTwo(ct2.getText().toString()));
-                        sendMessagetoAakash(removeLastTwo(ct3.getText().toString()));
-
-//                        i.putExtra("ChooseTime1",ct1.getText().toString());
-//                        i.putExtra("ChooseTime2",ct2.getText().toString());
-//                        i.putExtra("ChooseTime3",ct3.getText().toString());
-                        break;
-                    case 4:
-                        sendMessagetoAakash(removeLastTwo(ct1.getText().toString()));
-                        sendMessagetoAakash(removeLastTwo(ct2.getText().toString()));
-                        sendMessagetoAakash(removeLastTwo(ct3.getText().toString()));
-                        sendMessagetoAakash(removeLastTwo(ct4.getText().toString()));
-
-//                        i.putExtra("ChooseTime1",ct1.getText().toString());
-//                        i.putExtra("ChooseTime2",ct2.getText().toString());
-//                        i.putExtra("ChooseTime3",ct3.getText().toString());
-//                        i.putExtra("ChooseTime4",ct4.getText().toString());
-                        break;
-                    default:
-                        Toast.makeText(SelectTime.this,"0 selected",Toast.LENGTH_LONG).show();
-                }
-
+                /**
+                 * Sending JSON to MQTT
+                 */
 
 
             }
@@ -268,7 +276,7 @@ public class SelectTime extends AppCompatActivity {
                 } else {
                     amPm = "AM";
                 }
-                chooseTime.setText(String.format("%02d:%02d", hourOfDay, minutes) + amPm);
+                chooseTime.setText(String.format("%02d:%02d", hourOfDay, minutes));
             }
         }, currentHour, currentMinute, false);
 
@@ -377,4 +385,8 @@ public class SelectTime extends AppCompatActivity {
     }
 
 }
+
+
+
+
 

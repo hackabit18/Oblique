@@ -50,8 +50,8 @@ public class MainActivity extends AppCompatActivity {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Intent i = new Intent(MainActivity.this,SelectTime.class);
-//                startActivity(i);
+                Intent i = new Intent(MainActivity.this,SelectTime.class);
+                startActivity(i);
 
                 /**
                  * ADD NUMBER
