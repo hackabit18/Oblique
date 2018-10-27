@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
         next = findViewById(R.id.next);
 
-        np.setMinValue(0);
+        np.setMinValue(1);
         np.setMaxValue(3);
 
         np.setWrapSelectorWheel(true);
@@ -46,39 +46,53 @@ public class MainActivity extends AppCompatActivity {
                 {
                     case 1:
                         Phone1.setVisibility(View.VISIBLE);
+                        Phone2.setVisibility(View.GONE);
+                        Phone3.setVisibility(View.GONE);
+                        break;
                     case 2:
+                        Phone1.setVisibility(View.VISIBLE);
                         Phone2.setVisibility(View.VISIBLE);
+                        Phone3.setVisibility(View.GONE);
+                        break;
                     case 3:
                         Phone3.setVisibility(View.VISIBLE);
+                        Phone2.setVisibility(View.VISIBLE);
+                        Phone3.setVisibility(View.VISIBLE);
+                        break;
                     default:
                         Toast.makeText(MainActivity.this, "Only "+newVal+" Participants :) !!!", Toast.LENGTH_SHORT).show();
 
                 }
+
+//                new SharedPrefClass(MainActivity.this).saveNumber("partNumber", newVal);
+
             }
         });
 
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(MainActivity.this,SelectTime.class);
-                startActivity(i);
+
 
                 /**
-                 * ADD NUMBER
+                 * ADD PARTICIPANTS NUMBER
                  * IN SHARED PREFERENCE
                  */
 
                 SharedPrefClass storeMobile1 = new SharedPrefClass(MainActivity.this);
-                storeMobile1.saveMobile("mobile1 : ", Phone1.getText().toString());
+                storeMobile1.saveMobile("mobile1", Phone1.getText().toString());
 
                 SharedPrefClass storeMobile2 = new SharedPrefClass(MainActivity.this);
-                storeMobile2.saveMobile("mobile2 : ", Phone2.getText().toString());
+                storeMobile2.saveMobile("mobile2", Phone2.getText().toString());
 
                 SharedPrefClass storeMobile3 = new SharedPrefClass(MainActivity.this);
-                storeMobile3.saveMobile("mobile3 : ", Phone3.getText().toString());
+                storeMobile3.saveMobile("mobile3", Phone3.getText().toString());
 
                 //GET PHONE FROM HERE
 //                new SharedPrefClass(MainActivity.this).getMobile("mobile1 : ");
+
+                Intent i = new Intent(MainActivity.this,SelectTime.class);
+                startActivity(i);
 
             }
         });

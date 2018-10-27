@@ -13,21 +13,57 @@
         android:textSize="30sp"
         android:lines="4"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
+    <!--<TextView-->
+        <!--android:id="@+id/tv1"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:hint="Phone no. is"-->
+        <!--android:textSize="30sp"-->
+        <!--android:visibility="gone"/>-->
+
+    <!--<TextView-->
+        <!--android:id="@+id/tv2"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:hint="Phone no. is"-->
+        <!--android:textSize="30sp"-->
+        <!--android:visibility="gone"/>-->
+
+    <!--<TextView-->
+        <!--android:id="@+id/tv3"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:hint="Phone no. is"-->
+        <!--android:textSize="30sp"-->
+        <!--android:visibility="gone"/>-->
+
+
+
+    <TextView
+        android:id="@+id/phoneView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="PhoneView"
+        android:textSize="30sp"
+        android:visibility="gone"/>
 
     <ImageView
         android:id="@+id/gearIcon"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:src="@drawable/ic_action_name"
-        android:onClick="gearClicked"/>
+        android:src="@drawable/ic_action_name" />
 
-    <TextView
-        android:id="@+id/phoneView"
-        android:hint="Phone"
-        android:textSize="30sp"
-        android:lines="4"
+    <Button
+        android:id="@+id/reset"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="RESET"
+        android:textSize="30sp"
+        android:visibility="gone"/>
+
+
 
 </LinearLayout>
