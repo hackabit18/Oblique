@@ -17,39 +17,42 @@ WiFiClient client;
 #define AIO_SERVERPORT  1883
 #define AIO_USERNAME    "aakashk_kvjp58"
 #define AIO_KEY         "46f406136c5e4e5f874e283f95ed3dfc"
+bool if_parsed = false;
 Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_USERNAME, AIO_KEY);
+Adafruit_MQTT_Subscribe t1 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/t1",MQTT_QOS_1);
+Adafruit_MQTT_Publish button = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/t2");
 void MQTT_connect();
+
 
 struct config
 {
-  byte hour;
-  byte minute;
-  byte color[3];
+  byte hour[4];
+  byte minute[4];
 };
 config reminder[4];
 
-//Subscribe Topics
-Adafruit_MQTT_Subscribe t1 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/f/t1");
-Adafruit_MQTT_Subscribe t2 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/f/t2");
-Adafruit_MQTT_Subscribe t3 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/f/t3");
-Adafruit_MQTT_Subscribe t4 = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/f/t4");
-//Publish Topics
-Adafruit_MQTT_Publish button = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/f/button");
-Adafruit_MQTT_Publish ping = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/f/ping");
 
 /************************** NTP *****************************************/
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "0.asia.pool.ntp.org", 19800, 60000);
 
 /************************** JSON **************************************/
-StaticJsonBuffer<200> jsonBuffer;
-String data_json = "{t1:[\"dd\"],[\"mm\"],t1:[\"dd\"],[\"mm\"],t1:[\"dd\"],[\"mm\"],t1:[\"dd\"],[\"mm\"]}";
+StaticJsonBuffer<1000> jsonBuffer;
+String data_json;// = "{t1:[\"dd\"],[\"mm\"],t1:[\"dd\"],[\"mm\"],t1:[\"dd\"],[\"mm\"],t1:[\"dd\"],[\"mm\"]}";
+
+/******************************* Others *****************************************/
+const byte interruptPin = 14;
+volatile byte interruptCounter = 0;
+int numberOfInterrupts = 0;
+void handleInterrupt();
+bool parse_success = true;
 
 void setup() {
 // Connect to Wifi & OTA
 Serial.begin(9600);
 Serial.println("Booting");
-pinMode(D4,INPUT);
+pinMode(interruptPin, INPUT_PULLUP);
+attachInterrupt(digitalPinToInterrupt(interruptPin), handleInterrupt, FALLING);
 WiFi.begin(WLAN_SSID, WLAN_PASS);
 while (WiFi.waitForConnectResult() != WL_CONNECTED) {
     Serial.println("Connection Failed! Rebooting...");
@@ -88,52 +91,95 @@ ArduinoOTA.onStart([]() {
   });
   ArduinoOTA.setPassword("admin404");
   ArduinoOTA.begin();
+  
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
   // End of Wifi Connection Seq
   timeClient.begin();
   //Sub Topics
   mqtt.subscribe(&t1);
-  mqtt.subscribe(&t2);
-  mqtt.subscribe(&t3);
-  mqtt.subscribe(&t4);
 }
 
 void loop() {
     MQTT_connect();
     Adafruit_MQTT_Subscribe *subscription;
+    while ((subscription = mqtt.readSubscription(3000) )) {
+    subscription = mqtt.readSubscription(3000);
     data_json = (char*)t1.lastread;
-    JsonObject& data = jsonBuffer.parseObject(data_json);
-    // Test if parsing succeeds.
-    if (!data.success()) {
-      Serial.println("parseObject() failed");
-    }
-      //Store Hour and minute in reminder
-      for(int i=1 ; i<5 ; i++) 
-      {
-        String str = "t";
-        str += (char)i;
-        reminder[i].hour = data[str][0];
-        reminder[i].minute = data[str][1];
-        Serial.printf("reminder[%d]: %dhour %dmin ",i,reminder[i].hour,reminder[i].minute);
-        Serial.printf("%d:%d:%d color\n",reminder[0].color,reminder[1].color,reminder[2].color);
+    Serial.print("lastread: ");
+    Serial.println(data_json);
+ 
+      JsonObject& data = jsonBuffer.parseObject(data_json);
+      // Test if parsing succeeds.
+      if (!data.success()) {
+        Serial.println("parseObject() failed");
+        parse_success = false;
       }
-      
-      /*/Store Colors in reminder
-      {
-        String str = "c";
-        str += (char)i;
-        reminder[i].hour = data[str][0];
-        reminder[i].minute = data["t%d"][1];
+      // Continue to parse if initial parsing succeeds
+        if(parse_success){
+          //Store Hour and minute in reminder
+          //For reminder 1
+            Serial.println("\nReminder 1 :-");
+            String str = "t1";
+            for(int j=0; j<5; j+=2)
+            {
+              reminder[0].hour[j] = data[str][j];
+              reminder[0].minute[j] = data[str][j+1];
+              Serial.printf("reminder[0]: %dhour %dmin\n",reminder[0].hour[j],reminder[0].minute[j]);
+            }
+
+          //For reminder 2
+          Serial.println("\nReminder 2 :-");
+            str = "t2";
+            for(int j=0; j<5; j+=2)
+            {
+              reminder[1].hour[j] = data[str][j];
+              reminder[1].minute[j] = data[str][j+1];
+              Serial.printf("reminder[1]: %dhour %dmin\n",reminder[0].hour[j],reminder[0].minute[j]);
+            }
+
+          //For reminder 3
+            Serial.println("\nReminder 3:-");
+            str = "t3";
+            for(int j=0; j<5; j+=2)
+            {
+              reminder[2].hour[j] = data[str][j];
+              reminder[2].minute[j] = data[str][j+1];
+              Serial.printf("reminder[2]: %dhour %dmin\n",reminder[0].hour[j],reminder[0].minute[j]);
+            }
         
-      }
-      */
+          /*/Store Colors in reminder
+          {
+            String str = "c";
+            str += (char)i;
+            reminder[i].hour = data[str][0];
+            reminder[i].minute = data["t%d"][1];
+            
+          }*/
+          if_parsed = true;
+        }
+    }
+
+  
+    //}
+
+
+  Serial.print(F("\nSending photocell val "));
+  static int x;
+  Serial.print(x);
+  Serial.print("...");
+  if (! button.publish(x++)) {
+    Serial.println(F("Failed"));
+  } else {
+    Serial.println(F("OK!"));
+  }
+    
+      
     timeClient.update();
     Serial.printf("NTP Time: ");
     Serial.println(timeClient.getFormattedTime());
     ArduinoOTA.handle();
     delay(2500);
-    
 }
 
 /****************************** FUNCTIONS *************************************/
@@ -142,22 +188,27 @@ void MQTT_connect() {
 
   // Stop if already connected.
   if (mqtt.connected()) {
-    static unsigned int x = 0;
     return;
   }
+  
 
   Serial.print("Connecting to MQTT... ");
 
-  uint8_t retries = 4;
-  while ((ret = mqtt.connect()) != 0) {
+  uint8_t retries = 3;
+  while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
        Serial.println(mqtt.connectErrorString(ret));
-       Serial.println("Retrying MQTT connection in 5 seconds...");
+       Serial.println("Retrying MQTT connection in 10 seconds...");
        mqtt.disconnect();
-       delay(5000);
+       delay(10000);  // wait 10 seconds
        retries--;
        if (retries == 0) {
-         Serial.println("Can't Cpnnect after 4 retries, Restart!");
+         // basically die and wait for WDT to reset me
+         while (1);
        }
   }
   Serial.println("MQTT Connected!");
+}
+
+void handleInterrupt() {
+  Serial.println("Hello");
 }
