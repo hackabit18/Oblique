@@ -31,6 +31,7 @@ struct config
   byte minute;
   int timeleft;
   int endtime;
+  bool set;
 };
 config reminder[4];
 
@@ -61,6 +62,11 @@ const byte r = 0;
 const byte g = 5;
 const byte b = 4;
 const byte speaker = 13;
+bool pushed = false;
+bool y[3]={0,0,0};
+byte buzz_limit;
+byte ring = false;
+byte x=0;
 int time_in_min();
 long time_in_sec();
 void trigger(int,int,int);
@@ -73,6 +79,7 @@ pinMode(interruptPin, INPUT_PULLUP);
 pinMode(r,OUTPUT);
 pinMode(g,OUTPUT);
 pinMode(b,OUTPUT);
+pinMode(speaker,OUTPUT);
 digitalWrite(r,0);
 digitalWrite(g,0);
 digitalWrite(b,0);
@@ -129,6 +136,13 @@ void loop() {
     MQTT_connect();
     Adafruit_MQTT_Subscribe *subscription;
     while ((subscription = mqtt.readSubscription(3000) )) {
+    x = 0;
+    y[0]=0;
+    y[1]=0;
+    y[2]=0;
+    pushed = false;
+    ring = false;
+    buzz_limit = 0;
     button_pressed = false;
     calculated=false;
     subscription = mqtt.readSubscription(3000);
@@ -182,10 +196,13 @@ void loop() {
           Serial.printf("%dmin\n", reminder[0].timeleft);
           Serial.printf("%dmin\n", reminder[1].timeleft);
           Serial.printf("%dmin\n", reminder[2].timeleft);
+          reminder[1].set = true;
+          reminder[2].set = true;
+          reminder[3].set = true;
           if(!calculated){
             for(int i=0;i<=2;i++)
               {
-                reminder[i].endtime = reminder[i].hour*60 +  reminder[i].minute + 10;
+                reminder[i].endtime = reminder[i].hour*60 +  reminder[i].minute + 1;
                 Serial.print("End Times");
                 Serial.printf("%d %d\n", reminder[i].endtime/60 ,reminder[i].endtime%60);
               }
@@ -210,9 +227,21 @@ void loop() {
     Serial.printf("NTP Time: ");
     Serial.print(timeClient.getFormattedTime());
     Serial.printf("=%dminutes",time_in_min());
+    if(ring)
+    {
+        digitalWrite(speaker,0);
+        ring = 0;
+        Serial.println("Buzzer ON\n");
+    }
+    else
+    {
+       Serial.println("Buzzer OFF\n");
+       digitalWrite(speaker,1);
+       ring = false;
+    }
     ArduinoOTA.handle();
     delay(2500);
-}
+    } 
 
 /****************************** FUNCTIONS *************************************/
 void MQTT_connect() {
@@ -243,6 +272,7 @@ void MQTT_connect() {
 
 void handleInterrupt() {
   button_pressed = true;
+  pushed = true;
   Serial.println("INTEEUPT");
 }
 
@@ -258,8 +288,54 @@ long time_in_sec()
 
 void trigger(int a, int bx, int c)
 {
+  /************** De-trigger ***************/
+  if( reminder[0].endtime <= time_in_min())
+  { 
+    Serial.println("R1 De-Triggered");
+      digitalWrite(r,0);
+      if(!pushed)
+      {
+        Serial.println("button not Pressed");
+        delay(2200);
+        button.publish(1);
+        pushed = true;
+    }
+  }
+
+  if( reminder[1].endtime <= time_in_min())
+  { 
+        Serial.println("R2 De-Triggered");
+        digitalWrite(g,0);
+        if(!pushed)
+        {
+          Serial.println("button not Pressed");
+          delay(2200);
+          button.publish(1);
+          pushed = true;
+        }
+        x++;
+  }
+
+  if( reminder[2].endtime <= time_in_min())
+  { 
+
+      Serial.println("R3 De-Triggered");
+      digitalWrite(b,0);
+      if(!pushed)
+      {
+        Serial.println("button not Pressed");
+        delay(2200);
+        button.publish(1);
+        pushed = true;
+    }
+    x++;
+  }
+  if(x == 2) ring = false;
+
+  /***************** TRIGGER **************/
   if(button_pressed) 
   {
+    static int i=0;
     Serial.println("Button Pressed");
     Serial.println("R1 De-Triggered");
     digitalWrite(r,0);
@@ -269,36 +345,34 @@ void trigger(int a, int bx, int c)
     digitalWrite(b,0);
     return;
   }
-  if(a <= 1 ) 
+  if(a <= 1 && !(a<-1)) 
   {
     Serial.println("R1 Triggered");
     digitalWrite(r,1);
+    if(!y[0])
+    {
+      ring = true;
+      y[0] = 1;
+    }
   }
-  if(bx <= 1) 
+  if(bx <= 1  && !(bx<-1) ) 
   {
     Serial.println("R2 Triggered");
     digitalWrite(g,1);
+    if(!y[1])
+    {
+      ring = true;
+      y[1] = 1;
+    }
   }
-  if(c <= 1)
+  if(c <= 1  && !(c<-1))
   { 
     Serial.println("R3 Triggered");
     digitalWrite(b,1);
-  }
-
-  /************** De-trigger ***************/
-  if( reminder[0].endtime <= time_in_min())
-  { 
-    Serial.println("R1 De-Triggered");
-    digitalWrite(r,0);
-  }
-  if( reminder[1].endtime <= time_in_min())
-  { 
-    Serial.println("R2 De-Triggered");
-    digitalWrite(g,0);
-  }
-  if( reminder[2].endtime <= time_in_min())
-  { 
-    Serial.println("R3 De-Triggered");
-    digitalWrite(b,0);
+    if(!y[2])
+    {
+      ring = true;
+      y[1] = 1;
+    }
   }
 }
