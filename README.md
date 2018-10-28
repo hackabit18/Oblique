@@ -8,10 +8,6 @@ Forgetting to take pills is a very common problem and majority of the people esp
 
 
 
-  - Type some Markdown on the left
-  - See HTML in the right
-  - Magic
-
 # So how does it work???
 On the Android side we have implemented an application for the users or the care-takers of  patient where the user can input **the number of time pill is taken in a day**, **time of taking consuming it** and **participants to be contacted** if the pill is missed. This feature also allows the users and the patient to keep a track of missed pills. The hardware is **extremely basic** consisting of just an **Alarm buzzer**, an **LED** and a **push button** to turn of the alarm.
 
